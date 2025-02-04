@@ -1,11 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+
+// Define the Review type
+interface Review {
+  id: number;
+  content: string;
+  created_at: string;
+}
 
 export default function Home() {
   const [content, setContent] = useState("");
-  const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   // 获取回顾数据
   async function fetchReviews() {
@@ -17,16 +24,18 @@ export default function Home() {
   }
 
   // 组件加载时获取数据
-  useState(() => {
+  useEffect(() => {
     fetchReviews();
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
   // 处理提交
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!content.trim()) return;
 
-    const { error } = await supabase.from("daily_reviews").insert([{ content }]);
+    const { error } = await supabase
+      .from("daily_reviews")
+      .insert([{ content }]);
     if (error) {
       console.error("提交失败:", error.message);
       return;
